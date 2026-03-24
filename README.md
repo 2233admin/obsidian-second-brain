@@ -170,6 +170,21 @@ Update it when your priorities shift or your structure changes:
 
 ---
 
+## Parallel Subagents
+
+Complex commands don't run sequentially — they spawn parallel subagents internally, one per task group, and merge the results when all finish. This means a single `/obsidian-save` on a long conversation handles people, projects, tasks, decisions, and ideas all at the same time.
+
+| Command | What runs in parallel |
+|---|---|
+| `/obsidian-save` | People agent · Projects agent · Tasks agent · Decisions agent · Ideas agent |
+| `/obsidian-health` | Links agent · Duplicates agent · Frontmatter agent · Staleness agent · Orphans agent |
+| `/obsidian-recap` | One agent per daily note in the date range, all reading simultaneously |
+| `/obsidian-init` | Dashboard agent · Templates agent · Boards agent · Note samples agent |
+
+After all agents finish, the main thread merges results, updates the daily note, and reports back. You just see the final output.
+
+---
+
 ## Scheduled Agents
 
 Four agents that run autonomously on a schedule — no user action required. Set them up once with `/schedule` in Claude Code.
