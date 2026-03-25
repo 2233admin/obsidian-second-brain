@@ -23,11 +23,11 @@ description: >
 
 ### 0. Verify MCP is available
 
-This skill requires the `mcp-obsidian` MCP server to be running with your vault path configured. If vault tools (`get_file_contents`, `search`, etc.) are unavailable, stop immediately and tell the user:
+This skill uses the [`mcp-obsidian`](https://github.com/calclavia/mcp-obsidian) MCP server. The tool names below (`get_file_contents`, `list_files_in_vault`, `search`, `append_content`, `write_file`) are specific to that package. If you are using a different Obsidian MCP server, tool names may differ — check that server's documentation.
 
-> "The obsidian-vault MCP server isn't connected. Configure it in your Claude settings and restart, then try again."
+**If MCP vault tools are unavailable:** fall back to reading and writing files directly via the filesystem using standard file tools (Read, Write, Edit, Glob). The vault is plain markdown files — all operations can be done without MCP, just more verbosely. Tell the user:
 
-Do not attempt to improvise vault operations without MCP tools.
+> "The obsidian-vault MCP server isn't connected — I'll read/write vault files directly instead. To enable MCP for faster vault access, run: `claude mcp add obsidian-vault -s user -- npx -y mcp-obsidian \"/path/to/your/vault\"`"
 
 ### 1. First time in a vault → read `_CLAUDE.md`
 
@@ -513,6 +513,61 @@ To list or remove scheduled agents:
 
 ---
 
+## Background Agent (PostCompact Hook)
+
+A background agent that fires automatically whenever Claude compacts the conversation context. It reads the session summary and propagates everything worth preserving to the vault — no user action required.
+
+**What it does:** After each compaction, a headless `claude -p` subprocess wakes up, reads `_CLAUDE.md`, scans the summary for vault-worthy items (people, projects, decisions, tasks, dev work, ideas), and writes updates everywhere they belong — people notes, project notes, dev logs, kanban boards, and today's daily note.
+
+**How it works:**
+1. `PostCompact` hook fires in Claude Code after context compaction
+2. Hook script reads the JSON summary from stdin
+3. Spawns a headless `claude --dangerously-skip-permissions -p` subprocess in the vault directory
+4. Agent runs silently, propagates updates, and exits — user sees nothing
+
+**Setup:**
+
+1. Make the hook script executable (one-time):
+   ```bash
+   chmod +x ~/.claude/skills/obsidian-second-brain/hooks/obsidian-bg-agent.sh
+   ```
+
+2. Set `OBSIDIAN_VAULT_PATH` in `~/.claude/settings.json`:
+   ```json
+   {
+     "env": {
+       "OBSIDIAN_VAULT_PATH": "/path/to/your/vault"
+     }
+   }
+   ```
+
+3. Add the `PostCompact` hook to `~/.claude/settings.json`:
+   ```json
+   {
+     "hooks": {
+       "PostCompact": [
+         {
+           "matcher": "",
+           "hooks": [
+             {
+               "type": "command",
+               "command": "/Users/you/.claude/skills/obsidian-second-brain/hooks/obsidian-bg-agent.sh",
+               "timeout": 10,
+               "async": true
+             }
+           ]
+         }
+       ]
+     }
+   }
+   ```
+
+**Debugging:** The agent logs to `/tmp/obsidian-bg-agent.log`. Check there if updates aren't appearing.
+
+**Safety:** The agent never deletes, archives, or merges anything. It only adds or updates. If the summary has nothing vault-worthy, it exits without touching the vault.
+
+---
+
 ## Reference Files
 
 - `references/vault-schema.md` — Complete folder structure + frontmatter specs for all note types
@@ -521,5 +576,6 @@ To list or remove scheduled agents:
 
 ## Scripts
 
+- `scripts/setup.sh` — One-command installer (wires hook + env var + MCP)
 - `scripts/bootstrap_vault.py` — Bootstrap a complete vault from scratch
 - `scripts/vault_health.py` — Audit a vault for structural issues

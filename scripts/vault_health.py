@@ -29,6 +29,16 @@ FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 LINK_RE = re.compile(r"\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]")
 DATE_RE = re.compile(r"due:\s*(\d{4}-\d{2}-\d{2})")
 TEMPLATE_RE = re.compile(r"<%.*?%>")
+ALIAS_RE = re.compile(r"^aliases:\s*\n((?:\s+-\s+.+\n?)+)", re.MULTILINE)
+ALIAS_ITEM_RE = re.compile(r"^\s+-\s+(.+)$", re.MULTILINE)
+
+
+def parse_aliases(frontmatter: str) -> list:
+    """Extract aliases list from frontmatter text."""
+    block = ALIAS_RE.search(frontmatter)
+    if not block:
+        return []
+    return [m.strip().strip('"\'').lower() for m in ALIAS_ITEM_RE.findall(block.group(1))]
 
 
 def load_vault(vault: Path) -> dict:
@@ -41,7 +51,7 @@ def load_vault(vault: Path) -> dict:
         content = md.read_text(encoding="utf-8", errors="replace")
         fm_match = FRONTMATTER_RE.match(content)
         frontmatter = fm_match.group(1) if fm_match else ""
-        links = [l.strip() for l in LINK_RE.findall(content)]
+        links = [l.strip().rstrip("\\") for l in LINK_RE.findall(content)]
         due_match = DATE_RE.search(frontmatter)
         notes[rel] = {
             "path": md,
@@ -51,6 +61,7 @@ def load_vault(vault: Path) -> dict:
             "frontmatter": frontmatter,
             "has_frontmatter": bool(fm_match),
             "links": links,
+            "aliases": parse_aliases(frontmatter),
             "due": due_match.group(1) if due_match else None,
             "size": len(content),
         }
@@ -83,6 +94,12 @@ def check_orphans(notes: dict) -> list:
             all_links.add(link.lower())
             all_links.add(link.lower().replace(" ", "-"))
 
+    # also treat aliases as resolvable targets
+    alias_set = set()
+    for note in notes.values():
+        for alias in note["aliases"]:
+            alias_set.add(alias.lower())
+
     issues = []
     skip_folders = {"Daily", "Dev Logs", "Boards", "Templates", "Life Chapters",
                     "Faith", "Reviews", "Partner", "Family"}
@@ -99,6 +116,7 @@ def check_orphans(notes: dict) -> list:
             stem_lower in all_links
             or stem_norm in all_links
             or any(stem_lower in lk for lk in all_links)
+            or any(alias in all_links for alias in note["aliases"])
         )
         if not linked:
             issues.append({
@@ -168,12 +186,24 @@ def check_empty_folders(vault: Path) -> list:
 
 def check_broken_links(notes: dict, vault: Path) -> list:
     all_stems = {note["stem"].lower(): rel for rel, note in notes.items()}
+    # build alias → rel lookup so [[Full Name]] resolves if the note has that alias
+    all_aliases: dict[str, str] = {}
+    for rel, note in notes.items():
+        for alias in note["aliases"]:
+            all_aliases[alias.lower()] = rel
+
     issues = []
     for rel, note in notes.items():
         for link in note["links"]:
             link_stem = Path(link).stem.lower() if "/" in link else link.lower()
             link_norm = link_stem.replace("-", " ").replace("_", " ")
-            if link_stem not in all_stems and link_norm not in all_stems:
+            resolved = (
+                link_stem in all_stems
+                or link_norm in all_stems
+                or link_stem in all_aliases
+                or link_norm in all_aliases
+            )
+            if not resolved:
                 potential_folder = vault / link
                 if not potential_folder.is_dir():
                     issues.append({
