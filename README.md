@@ -137,6 +137,8 @@ Four agents that run on a schedule — no user action required. Set up once with
 
 Then tell Claude which agents you want and at what times.
 
+> **Note:** Scheduled agents run on Anthropic's servers on a timer, but they need to access your vault — which is a local folder on your machine. If your computer is off when a scheduled agent fires, it won't be able to read or write vault files. For most people, the background agent (PostCompact) is more reliable since it runs automatically during actual working sessions.
+
 ---
 
 ## Vault Health Check
