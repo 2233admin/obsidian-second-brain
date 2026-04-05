@@ -11,7 +11,7 @@
 <p align="center">
   <strong>Turn your Obsidian vault into a personal AI operating system.</strong>
   <br />
-  <em>21 commands &middot; 4 thinking tools &middot; 4 scheduled agents &middot; 1 background agent</em>
+  <em>21 commands &middot; 4 thinking tools &middot; knowledge ingestion &middot; 4 scheduled agents &middot; 1 background agent</em>
   <br /><br />
   <a href="#install">Install</a> &middot;
   <a href="#the-three-layers">Features</a> &middot;
@@ -48,19 +48,23 @@ If you take notes in Obsidian and use Claude, this skill is the bridge between t
 
 ## The Problem
 
-Most people use AI as a search engine. Ask a question, get an answer, forget it. Every session starts from zero. Your best ideas, decisions, and lessons scatter across chats that disappear.
+You use Claude every day. But every session starts from zero. You re-explain your project, your context, your preferences. The conversation ends and everything is lost.
 
-And note-taking doesn't help — you take notes but never connect them. Decisions get made and forgotten. Patterns repeat across projects because you can't see them. Ideas sit in daily notes and never become anything.
+You take notes in Obsidian. But they sit there. Decisions get made and forgotten. You write the same lesson twice because you can't find the first one. Ideas stay in daily notes forever. Nobody connects the dots.
+
+**Two powerful tools. Zero connection between them.**
 
 ## The Solution
 
-This skill solves both problems at once. Your vault becomes Claude's memory, and Claude becomes your vault's brain.
+This skill connects them. Your vault becomes Claude's long-term memory. Claude becomes your vault's brain.
 
-> **You talk. Claude remembers.** Every decision, person, task, and idea gets saved to the right place — automatically.
+> **You talk. Claude remembers.** Finish a conversation, type `/obsidian-save`. Every decision, person, task, and idea gets saved to the right note — automatically. You do nothing.
 >
-> **You write. Claude thinks.** Your notes become fuel for insight. Claude red-teams your plans, finds unnamed patterns, and connects ideas across domains you'd never link yourself.
+> **You drop a link. Claude learns.** Type `/obsidian-ingest` with a YouTube video, article, or PDF. Claude extracts every person, concept, and insight and distributes them across 5-15 vault pages. One source in, knowledge everywhere.
 >
-> **You sleep. Claude maintains.** Scheduled agents run morning, night, and weekly — autonomously. A background agent fires after every compaction and silently updates your vault while you keep working.
+> **You ask. Your vault argues back.** Type `/obsidian-challenge`. Claude searches your own history for contradictions, past failures, and reversed decisions — then pushes back with your own words. This isn't generic AI. This is your vault holding you accountable.
+>
+> **You sleep. Claude maintains.** Scheduled agents create your morning briefing, close out your day, write your weekly review, and audit your vault for rot. A background agent fires after every compaction and silently updates your vault while you keep working.
 
 ---
 
@@ -75,37 +79,45 @@ This skill solves both problems at once. Your vault becomes Claude's memory, and
 | Session continuity | Re-explain everything each time | Memory is unreliable | `/obsidian-world` — full context in one command |
 | Vault maintenance | Manual weekly cleanup | N/A | Background agent + scheduled health checks |
 | Cross-domain idea generation | Rare flashes of insight | Generic brainstorming | `/obsidian-connect` — traces your vault's link graph |
+| Ingesting external content | Read it, forget it | Summarize into 1 note | `/obsidian-ingest` — 1 source becomes 5-15 interconnected vault pages |
+| Knowing why your vault is structured this way | You don't remember | N/A | `/obsidian-adr` — decision records for every structural change |
 
 ---
 
 ## The Three Layers
 
 ```
-                    +-----------------------------------------+
-                    |        obsidian-second-brain             |
-                    +-----------------------------------------+
-                    |                                         |
-  LAYER 1           |   Vault Operations (14 commands)        |
-  "Claude           |   save, daily, log, task, person,       |
-   remembers"       |   decide, capture, find, recap,         |
-                    |   review, board, project, health, init  |
-                    +-----------------------------------------+
-                    |                                         |
-  LAYER 2           |   Thinking Tools (4 commands)           |
-  "Claude           |   challenge  - red-team your ideas      |
-   thinks           |   emerge     - surface hidden patterns  |
-   with you"        |   connect    - bridge unrelated domains |
-                    |   graduate   - idea -> full project     |
-                    +-----------------------------------------+
-                    |                                         |
-  LAYER 3           |   Context Engine (1 command)            |
-  "Claude           |   world - load identity + state         |
-   knows you"       |          in one shot                    |
-                    +-----------------------------------------+
-                    |                                         |
-  ALWAYS ON         |   Background Agent (PostCompact hook)   |
-                    |   4 Scheduled Agents (cron)             |
-                    +-----------------------------------------+
+  +-----------------------------------------+
+  |        obsidian-second-brain             |
+  +-----------------------------------------+
+  |                                         |
+  |   LAYER 1: Vault Operations (16 cmds)   |
+  |   "Claude remembers"                    |
+  |   save, daily, log, task, person,       |
+  |   decide, capture, find, recap, review, |
+  |   board, project, health, init,         |
+  |   ingest, adr                           |
+  +-----------------------------------------+
+  |                                         |
+  |   LAYER 2: Thinking Tools (4 cmds)      |
+  |   "Claude thinks with you"              |
+  |   challenge - argue against your ideas  |
+  |   emerge    - find what you can't see   |
+  |   connect   - bridge unrelated domains  |
+  |   graduate  - idea -> full project      |
+  +-----------------------------------------+
+  |                                         |
+  |   LAYER 3: Context Engine (1 cmd)       |
+  |   "Claude knows you"                    |
+  |   world - identity + state (L0-L3)      |
+  +-----------------------------------------+
+  |                                         |
+  |   ALWAYS ON                             |
+  |   Background Agent (PostCompact hook)   |
+  |   4 Scheduled Agents (cron)             |
+  |   Two-Output Rule (auto vault updates)  |
+  |   index.md + log.md (navigation + log)  |
+  +-----------------------------------------+
 ```
 
 ---
@@ -346,7 +358,7 @@ Creates a complete vault with folders, templates, kanban boards, a Home dashboar
 ```
 obsidian-second-brain/
 +-- SKILL.md                        # Core instructions for Claude
-+-- commands/                       # 19 slash commands
++-- commands/                       # 21 slash commands
 +-- hooks/                          # Background agent hook
 +-- references/
 |   +-- vault-schema.md             # Folder structure + frontmatter specs
@@ -364,11 +376,15 @@ obsidian-second-brain/
 
 > Most second brain tools make you the janitor. You spend more time organizing than thinking.
 
-This skill inverts that. You think, work, and talk. Claude handles the memory. And then it uses that memory to make you think better — surfacing what you'd miss, challenging what you'd assume, and connecting what you'd never link.
+This skill inverts that. You think, work, and talk. Claude handles the memory. And then it uses that memory to make you think better.
 
-The vault gets smarter every day you use it. Not because of AI magic, but because your own writing compounds. The more you write, the more context Claude has, the more it can do for you.
+Every note you write gives Claude more context. Every decision you log becomes ammunition for `/obsidian-challenge`. Every idea you capture becomes a candidate for `/obsidian-graduate`. Every source you ingest spreads knowledge across 5-15 vault pages. The vault compounds. Not linearly -- exponentially.
+
+Everyone will have access to the same AI models. The differentiator isn't the model. It's having years of interlinked personal writing for the model to work with.
 
 **Your notes are the moat.**
+
+Inspired by [Andrey Karpathy's LLM-Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) -- the idea that LLMs should maintain persistent, compounding knowledge bases instead of re-deriving answers every time.
 
 ---
 
