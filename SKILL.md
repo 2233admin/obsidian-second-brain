@@ -407,6 +407,135 @@ If `_CLAUDE.md` already exists: show a diff of what would change and ask before 
 
 ---
 
+## Thinking Tools
+
+These commands use the vault as a thinking partner — not just storage. They surface insights, challenge assumptions, and generate connections that the user cannot see on their own.
+
+---
+
+### `/obsidian-challenge`
+
+**Red-teams your current idea against your own vault history.**
+
+Steps:
+1. Identify the user's current claim, plan, or assumption — from the argument or conversation context
+2. Extract the key premises behind that position
+3. Spawn parallel subagents to search for counter-evidence:
+   - **Decisions agent**: search Key Decisions sections for past decisions that contradicted similar thinking
+   - **Failures agent**: search dev logs, daily notes, and archives for past failures or lessons related to this topic
+   - **Contradictions agent**: search for notes where the user held the opposite position or flagged risks
+4. Synthesize a structured "Red Team" analysis:
+   - **Your position**: restate the claim
+   - **Counter-evidence from your vault**: cite specific notes, dates, and quotes
+   - **Blind spots**: what the user might be ignoring based on their own history
+   - **Verdict**: consistent with past experience, or does the vault suggest caution?
+5. Log the challenge in today's daily note under a Thinking section
+
+Do not be agreeable. The entire point is to pressure-test. Cite specific vault files.
+
+---
+
+### `/obsidian-emerge`
+
+**Surfaces unnamed patterns from recent notes — recurring themes and conclusions you haven't explicitly stated.**
+
+Steps:
+1. Determine the date range from the argument (default: last 30 days)
+2. Spawn parallel subagents to scan vault content:
+   - **Daily notes agent**: extract recurring topics, complaints, observations, energy patterns
+   - **Dev logs agent**: extract repeated blockers, tools, architectural patterns
+   - **Decisions agent**: look for directional trends across project notes
+   - **Ideas agent**: look for thematic clusters in Ideas/ notes
+3. Identify:
+   - **Recurring themes**: topics that appeared 3+ times without being named as a priority
+   - **Emotional patterns**: what energizes vs. drains (based on language)
+   - **Unnamed conclusions**: things the notes imply but never state outright
+   - **Emerging directions**: where the vault suggests the user is heading
+4. Present a "Pattern Report" — each pattern with evidence (cited notes), interpretation, and suggested action
+5. Offer to save the report to `Ideas/` or a relevant project note
+6. Log a summary in today's daily note
+
+The goal is insight the user cannot see themselves. Surface what they haven't named yet.
+
+---
+
+### `/obsidian-connect [topic A] [topic B]`
+
+**Bridges two unrelated domains using the vault's link graph to spark new ideas.**
+
+Steps:
+1. Parse two domains from arguments (e.g., `/obsidian-connect "distributed systems" "cooking"`)
+2. For each domain, search the vault: find all related notes, map backlinks and outgoing links to build a local cluster
+3. Find the bridge:
+   - Shared links, tags, or people between the two clusters
+   - If a direct path exists in the link graph, trace it and explain each hop
+   - If no direct path, find the closest semantic overlap
+4. Generate creative connections:
+   - **Structural analogy**: how a pattern in A maps to B
+   - **Transfer opportunities**: what works in A that could apply to B
+   - **Collision ideas**: new concepts that only exist at the intersection
+5. Present 3-5 specific, actionable connections — not vague analogies but concrete ideas
+6. Offer to save the best connections to `Ideas/` with links to both source domains
+7. Log the connection exercise in today's daily note
+
+The value is in unexpected links. If the connection is obvious, dig deeper.
+
+---
+
+### `/obsidian-graduate`
+
+**Promotes an idea fragment into a full project spec with tasks, board entries, and structure.**
+
+Steps:
+1. If argument given: search `Ideas/`, daily notes, and captures for a matching idea (fuzzy)
+2. If no argument: list recent ideas (last 14 days) and ask the user to pick one
+3. Read the full idea note and any linked notes for context
+4. Research the vault for related content: overlapping projects, related people, past decisions, similar ideas explored before
+5. Generate a full project spec:
+   - **Project note** in `Projects/` with complete frontmatter (status: planning, linked idea)
+   - **Goals**: 3-5 concrete outcomes
+   - **Key tasks**: broken into phases with priorities
+   - **Open questions**: what still needs answering
+   - **Related notes**: links to everything relevant
+6. Add cards to the relevant kanban board
+7. Update the original idea note: add `status: graduated` and link to the new project
+8. Link the new project from today's daily note
+
+The idea doesn't die — it evolves. The original note stays as the origin story.
+
+---
+
+## Context Engine
+
+### `/obsidian-world`
+
+**Loads your identity, values, priorities, and current state in one shot.**
+
+Steps:
+1. Load the identity layer (read if they exist):
+   - `SOUL.md` or `About Me.md` — who the user is, communication style, thinking preferences
+   - `CORE_VALUES.md` or `Values.md` — decision-making principles and non-negotiables
+   - `Home.md` or `Dashboard.md` — current top-level priorities
+2. Load the current state:
+   - Today's daily note and the last 3 daily notes for momentum and open threads
+   - Active kanban boards for in-progress and overdue items
+   - Previous session digests (look for "End of Day" or "Session Digest" sections)
+3. Load the context:
+   - Active project notes (status: active) for current goals and blockers
+   - Key people interacted with recently (last 7 days)
+4. Present a brief status:
+   - **Who I am to you**: persona and communication style
+   - **Your current priorities**: top 3-5 active threads
+   - **Open threads from last session**: anything unfinished
+   - **Overdue / needs attention**: stale tasks or projects
+   - **Today so far**: what's already logged
+
+Keep output concise — this is a boot-up sequence, not a report.
+
+If identity files don't exist, offer to create them by asking 5-7 quick questions about the user's role, values, and preferences.
+
+---
+
 ## Scheduled Agents
 
 Four autonomous agents designed to run on a schedule with no user intervention. Each runs a focused vault operation at a set time, then stops. They are conservative by default — they never delete or archive anything autonomously, and they never ask the user questions mid-run.
