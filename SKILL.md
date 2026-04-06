@@ -52,12 +52,20 @@ Scan the structure to understand: folder names, template locations, naming conve
 
 If the user has no vault yet, run:
 ```bash
+# Default: Wiki-style (LLM-first — optimized for Claude as primary reader/writer)
 python scripts/bootstrap_vault.py --path ~/path/to/vault --name "Your Name"
+
+# Alternative: Obsidian-style (human-first — for users who browse their vault daily)
+python scripts/bootstrap_vault.py --path ~/path/to/vault --name "Your Name" --style obsidian
 ```
 
 Then configure `mcp-obsidian` to point at the new vault path and restart Claude.
 
-This creates a complete production-ready vault structure with all templates, a Home dashboard, kanban boards, and a pre-filled `_CLAUDE.md`. See `scripts/bootstrap_vault.py`.
+**Wiki-style (default)** creates: `raw/` (immutable sources), `wiki/` (Claude's workspace with entities/, concepts/, projects/, daily/, logs/, reviews/, tasks/, decisions/), `boards/`, `templates/`, plus `_CLAUDE.md`, `index.md`, `log.md`, and `SOUL.md`.
+
+**Obsidian-style** creates: the traditional folder structure (People/, Projects/, Ideas/, Daily/, etc.) optimized for human browsing.
+
+See `references/vault-schema.md` for full details on both structures.
 
 ---
 
@@ -78,6 +86,9 @@ Every write operation must ask: *where else does this belong?*
 | Any vault write | `log.md` (append timestamped entry), `index.md` (update if new note created) |
 
 Always propagate. Never create a single orphaned note.
+
+### Raw is immutable
+In wiki-style vaults, the `raw/` folder contains original sources (articles, transcripts, PDFs). Claude reads these but NEVER modifies them. They are the source of truth. If a wiki page gets corrupted, re-derive it from the raw source. When ingesting, always save the original to `raw/` and the derived pages to `wiki/`.
 
 ### Maintain `index.md` and `log.md`
 Two structural files that keep the vault navigable and auditable:

@@ -281,26 +281,62 @@ Complex commands spawn parallel subagents — one per task group — and merge r
 
 ---
 
-## How `_CLAUDE.md` Works
+## Vault Architecture
 
-The entire system runs on one file at your vault root.
+Two styles. Pick the one that matches how you work.
+
+### Wiki-style (default) — for LLM-first users
+
+Claude does most or all of the writing. You interact through Claude, not Obsidian. The vault is a database.
 
 ```
-Your Mac
+Your Vault/
++-- _CLAUDE.md        # Operating manual
++-- index.md          # Page catalog (Claude reads FIRST)
++-- log.md            # Activity timeline
++-- SOUL.md           # Your identity
 |
-+-- Claude Desktop / Claude Code / VS Code
-|   +-- reads _CLAUDE.md on every session start
++-- raw/              # IMMUTABLE. Claude reads, never writes.
+|   +-- articles/     # Original source material
+|   +-- transcripts/  # Meeting notes, podcasts
+|   +-- pdfs/         # Documents
+|   +-- videos/       # YouTube metadata + transcripts
 |
-+-- Your Vault/
-    +-- _CLAUDE.md          <-- Claude's operating manual
-    +-- Home.md
-    +-- Daily/
-    +-- Projects/
-    +-- Boards/
-    +-- ...
++-- wiki/             # Claude's workspace
+|   +-- entities/     # People, companies, tools (flat)
+|   +-- concepts/     # Ideas, frameworks
+|   +-- projects/     # Project notes
+|   +-- daily/        # Daily notes
+|   +-- logs/         # Dev/work logs
+|   +-- reviews/      # Weekly/monthly reviews
+|   +-- tasks/        # Task notes
+|   +-- decisions/    # ADRs
+|
++-- boards/           # Kanban boards
++-- templates/        # Note templates
 ```
 
-Every Claude surface reads this file first. It contains your folder structure, naming conventions, frontmatter schemas, propagation rules, and active context. No memory required. Every session starts with full context.
+`raw/` is the source of truth. Claude never touches it. If a wiki page gets corrupted, re-derive from raw. `wiki/` is Claude's workspace. Every entity, concept, and project lives here. `index.md` is the front door — Claude reads it first, navigates from there.
+
+### Obsidian-style (alternative) — for users who browse daily
+
+```
+Your Vault/
++-- _CLAUDE.md, index.md, log.md, Home.md
++-- Daily/, Projects/, People/, Ideas/, Knowledge/
++-- Dev Logs/, Tasks/, Reviews/, Boards/, Templates/
+```
+
+Traditional folders for human spatial memory. Same commands, same features — just different folder layout.
+
+Choose at bootstrap:
+```bash
+# Wiki-style (default)
+python bootstrap_vault.py --path ~/my-vault --name "Your Name"
+
+# Obsidian-style
+python bootstrap_vault.py --path ~/my-vault --name "Your Name" --style obsidian
+```
 
 ---
 
