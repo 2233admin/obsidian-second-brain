@@ -255,6 +255,18 @@ You keep working. The vault updates itself.
 
 ---
 
+## Proactive Save Reminders
+
+The background agent only works in Claude Code. On Claude Desktop, conversations disappear when you close them.
+
+So Claude reminds you. After 10+ exchanges, when you say "thanks" or "done", or when a work block finishes, Claude suggests:
+
+> *"Before you go -- want me to /obsidian-save this conversation?"*
+
+No lost knowledge. Every surface, every session.
+
+---
+
 ## Scheduled Agents
 
 | Agent | When | What it does |
