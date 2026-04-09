@@ -105,6 +105,33 @@ Every write operation must ask: *where else does this belong?*
 
 Always propagate. Never create a single orphaned note.
 
+### Temporal facts — never overwrite, always append
+When a fact changes (role, company, status, location, tool), NEVER delete the old value. Add a new entry to the `timeline:` frontmatter array:
+
+```yaml
+timeline:
+  - fact: "CTO at Single Grain"
+    from: 2024-01-01
+    until: 2026-04-07
+  - fact: "Architect at Single Grain"
+    from: 2026-04-07
+    until: present
+```
+
+Top-level fields (`role:`, `status:`, `company:`) always reflect the CURRENT state. The `timeline:` preserves the full history. This applies to entities, projects, and any note where facts change over time.
+
+This enables historical queries ("who was my manager in February?"), smart reconciliation (different roles at different times = not a contradiction), and full change tracking.
+
+### CRITICAL_FACTS.md — always loaded
+A tiny file (~120 tokens) loaded alongside `SOUL.md` at L0 in every session. Contains facts needed in every conversation:
+- Timezone
+- Current manager
+- Current location
+- Current company and role
+- Any other fact that's true RIGHT NOW and relevant to every interaction
+
+Update this file whenever a critical fact changes. Keep it under 150 tokens.
+
 ### Raw is immutable
 In wiki-style vaults, the `raw/` folder contains original sources (articles, transcripts, PDFs). Claude reads these but NEVER modifies them. They are the source of truth. If a wiki page gets corrupted, re-derive it from the raw source. When ingesting, always save the original to `raw/` and the derived pages to `wiki/`.
 

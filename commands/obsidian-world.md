@@ -8,9 +8,10 @@ Use the obsidian-second-brain skill. Execute `/obsidian-world`:
 
 2. Load context progressively — start light, go deeper only as needed:
 
-   **L0 — Identity (~200 tokens)**
+   **L0 — Identity (~170 tokens)**
    Read these files if they exist (search for them if paths differ):
    - `SOUL.md` or `About Me.md` — who the user is, communication style, thinking preferences
+   - `CRITICAL_FACTS.md` — ~120 tokens of always-needed context: timezone, manager, location, company, role
    - `CORE_VALUES.md` or `Values.md` — decision-making principles and non-negotiables
 
    **L1 — Navigation (~1-2K tokens)**

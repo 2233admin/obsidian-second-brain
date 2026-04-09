@@ -10,6 +10,7 @@ Your Vault/
 ├── index.md                    ← Catalog of all pages (Claude reads this FIRST)
 ├── log.md                      ← Chronological log of every vault operation
 ├── SOUL.md                     ← Identity, values, communication style
+├── CRITICAL_FACTS.md           ← ~120 tokens, always loaded: timezone, manager, location, company
 │
 ├── raw/                        ← IMMUTABLE. Claude reads, never writes.
 │   ├── articles/               ← Clipped articles, web pages
@@ -115,6 +116,13 @@ tags:
   - project
 status: active   # active | planning | completed | archived | on-hold
 job: "[[Acme Corp]]"   # or Personal, [[Company Name]]
+timeline:                # temporal facts — status changes over time
+  - fact: "status: planning"
+    from: 2026-03-01
+    until: 2026-03-15
+  - fact: "status: active"
+    from: 2026-03-15
+    until: present
 ---
 ```
 
@@ -139,11 +147,25 @@ date: 2026-03-24
 tags:
   - entity
   - person       # or: company, tool
-role: "Senior Engineer"
-company: "[[Acme Corp]]"
+role: "Senior Engineer"        # current role
+company: "[[Acme Corp]]"       # current company
 last_interaction: 2026-03-24
+timeline:                       # temporal facts — never delete, only append
+  - fact: "CTO at Acme Corp"
+    from: 2024-01-01
+    until: 2026-04-07
+  - fact: "Architect at Acme Corp"
+    from: 2026-04-07
+    until: present
 ---
 ```
+
+**Temporal facts rule:** never overwrite a role, company, status, or location. Add a new entry to `timeline:` with `from` and `until` dates. The `role:` and `company:` top-level fields always reflect the CURRENT state. The `timeline:` preserves history.
+
+This enables:
+- Historical queries ("who was CTO in January?")
+- Smart reconciliation (two notes with different roles = different time periods, not a contradiction)
+- Full change history for people, companies, tools, and projects
 
 ### Source Note (raw/)
 ```yaml

@@ -205,6 +205,7 @@ This vault rewrites itself with every input:
 - **Ingest a source** -- existing pages get rewritten, contradictions resolved, patterns synthesized
 - **Save a conversation** -- entities, concepts, and decisions distribute across the vault
 - **Ask a question** -- the Two-Output Rule means every answer also updates pages
+- **A fact changes** -- temporal facts track the timeline. Old facts aren't deleted, they get a `until:` date. The vault remembers what was true and when.
 - **Do nothing** -- background agent and scheduled agents maintain it while you sleep
 - **Wait a week** -- auto-synthesis finds cross-source patterns and writes connection pages
 
@@ -264,6 +265,7 @@ vault/
 +-- index.md            # Page catalog (Claude reads FIRST)
 +-- log.md              # Activity timeline
 +-- SOUL.md             # Your identity
++-- CRITICAL_FACTS.md   # ~120 tokens, always loaded (timezone, manager, location)
 +-- raw/                # IMMUTABLE source material
 +-- wiki/               # Claude's workspace
 |   +-- entities/       # People, companies, tools
