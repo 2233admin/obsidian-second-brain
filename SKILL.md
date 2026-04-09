@@ -767,16 +767,36 @@ Setup:
 
 ### `obsidian-nightly` — Daily at 10:00 PM
 
-**Closes out the day — saves anything unsaved, updates the daily note.**
+**Sleeptime consolidation — the vault gets smarter overnight.**
+
+This agent does more than close the day. It actively consolidates and improves the vault while you sleep.
 
 Prompt to schedule:
 ```
-Read _CLAUDE.md. Read today's daily note in Daily/.
-Scan the current session context for anything worth saving that hasn't been logged yet:
-decisions, tasks completed, people mentioned, ideas discussed.
-Append a ## End of Day section to today's daily note with a 3-5 bullet summary of the day.
-Move any completed kanban tasks to the Done column if not already done.
-Do not ask questions. Save and stop.
+Read _CLAUDE.md. This is a sleeptime consolidation pass — the vault should be smarter when the user wakes up.
+
+Phase 1 — Close the day:
+- Read today's daily note. Append a ## End of Day section with a 3-5 bullet summary.
+- Move any completed kanban tasks to Done.
+
+Phase 2 — Reconcile:
+- Scan wiki/entities/ for outdated roles, companies, or descriptions that conflict with newer daily notes.
+- Scan wiki/concepts/ for claims contradicted by recently ingested sources.
+- Auto-resolve clear winners. Flag ambiguous ones in wiki/decisions/.
+
+Phase 3 — Synthesize:
+- Scan sources ingested today and yesterday. Find concepts that appear in 2+ unrelated sources.
+- If patterns found: create wiki/concepts/Synthesis — Title.md with evidence and interpretation.
+
+Phase 4 — Heal:
+- Find notes created today with no incoming links. Add links from relevant existing pages.
+- Check if any entity pages reference old timeline entries without an "until" date that should be closed.
+- Rebuild index.md to reflect today's changes.
+
+Phase 5 — Log:
+- Append to log.md: ## [YYYY-MM-DD] nightly | End of day + X reconciled, Y synthesized, Z orphans linked
+
+Do not ask questions. Do not fix anything destructive — only add, update, link. Save and stop.
 ```
 
 Setup:

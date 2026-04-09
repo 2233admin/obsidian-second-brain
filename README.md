@@ -248,7 +248,7 @@ PostCompact -> obsidian-bg-agent.sh -> claude -p (headless) -> vault updated
 | Agent | When | What |
 |---|---|---|
 | `morning` | 8 AM | Daily note + overdue tasks |
-| `nightly` | 10 PM | End of day summary + board cleanup |
+| `nightly` | 10 PM | Sleeptime consolidation: close day + reconcile + synthesize + heal orphans |
 | `weekly` | Fridays 6 PM | Weekly review |
 | `health` | Sundays 9 PM | Vault health audit |
 
