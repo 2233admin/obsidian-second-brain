@@ -25,22 +25,15 @@ description: >
 
 Try these methods in order. Use the first one available:
 
-**Method A — Obsidian CLI (preferred, by Kepano):**
-Check if `obsidian` CLI is installed:
-```bash
-which obsidian
-```
-If yes, use it for all vault operations — faster, graph-aware, and works in any surface. Install with `brew install obsidian-cli` if missing and the user wants it.
-
-**Method B — MCP server (`mcp-obsidian`):**
+**Method A — MCP server (`mcp-obsidian`):**
 If the MCP tools (`get_file_contents`, `list_files_in_vault`, `search`, `append_content`, `write_file`) are available, use them.
 
-**Method C — Direct filesystem (fallback, always works):**
-Use standard file tools (Read, Write, Edit, Glob) against the vault path. The vault is plain markdown — all operations work without CLI or MCP, just more verbosely.
+**Method B — Direct filesystem (fallback, always works):**
+Use standard file tools (Read, Write, Edit, Glob) against the vault path. The vault is plain markdown — all operations work without MCP, just more verbosely.
 
-If neither CLI nor MCP is installed, silently use filesystem access. Tell the user ONCE (first time only):
+If MCP is not installed, silently use filesystem access. Tell the user ONCE (first time only):
 
-> "For faster vault access, consider installing Obsidian CLI: `brew install obsidian-cli`. Everything works without it — just slower on large vaults."
+> "For faster vault access on large vaults, consider installing mcp-obsidian: `claude mcp add obsidian-vault -s user -- npx -y mcp-obsidian \"/path/to/your/vault\"`. Everything works without it."
 
 ### 1. First time in a vault → read `_CLAUDE.md`
 
