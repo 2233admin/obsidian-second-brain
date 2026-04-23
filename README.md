@@ -6,6 +6,10 @@
   <img src="https://img.shields.io/github/stars/eugeniughelbur/obsidian-second-brain?style=for-the-badge&color=yellow" alt="Stars" />
 </p>
 
+<p align="center">
+  <a href="https://oosmetrics.com/repo/eugeniughelbur/obsidian-second-brain"><img src="https://api.oosmetrics.com/api/v1/badge/achievement/7a416981-2e9b-43c5-8c99-4a4f1dfc5b77.svg" alt="oosmetrics Top 2 in Secrets" /></a>
+</p>
+
 <h1 align="center">obsidian-second-brain</h1>
 
 <p align="center">
