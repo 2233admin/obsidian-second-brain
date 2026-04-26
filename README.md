@@ -31,12 +31,21 @@
 </p>
 
 <p align="center">
-  built by <strong>Eugeniu Ghelbur</strong>
-  <br /><br />
-  <a href="https://x.com/eugeniu_ghelbur"><img src="https://img.shields.io/badge/follow-%40eugeniu__ghelbur-000?style=for-the-badge&logo=x&logoColor=white" alt="X / Twitter" /></a>
-  <a href="https://www.linkedin.com/in/eugeniu-ghelbur/"><img src="https://img.shields.io/badge/connect-eugeniu--ghelbur-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
-  <a href="https://ghelburlabs.substack.com"><img src="https://img.shields.io/badge/subscribe-ghelburlabs-FF6719?style=for-the-badge&logo=substack&logoColor=white" alt="Substack" /></a>
-  <a href="https://github.com/eugeniughelbur"><img src="https://img.shields.io/badge/follow-eugeniughelbur-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+  <a href="https://github.com/eugeniughelbur">
+    <img src="https://github.com/eugeniughelbur.png" width="72" height="72" alt="Eugeniu Ghelbur" style="border-radius: 50%;" />
+  </a>
+</p>
+
+<p align="center">
+  Built by <strong>Eugeniu Ghelbur</strong> · AI Automation Engineer @ Single Grain<br />
+  <em>building in public · sharing what works</em>
+</p>
+
+<p align="center">
+  <a href="https://x.com/eugeniu_ghelbur"><img src="https://img.shields.io/badge/Follow_on_X-000?style=for-the-badge&logo=x&logoColor=white" alt="X" /></a>
+  <a href="https://www.linkedin.com/in/eugeniu-ghelbur/"><img src="https://img.shields.io/badge/Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
+  <a href="https://ghelburlabs.substack.com"><img src="https://img.shields.io/badge/Subscribe-FF6719?style=for-the-badge&logo=substack&logoColor=white" alt="Substack" /></a>
+  <a href="https://github.com/eugeniughelbur"><img src="https://img.shields.io/badge/Follow-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
 </p>
 
 ---
