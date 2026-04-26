@@ -1,0 +1,89 @@
+"""xAI Grok client with Live Search support. Uses the /v1/responses endpoint."""
+
+import time
+import requests
+from typing import Any
+
+from .config import GROK_MODEL, XAI_API_KEY
+from . import usage
+
+API_URL = "https://api.x.ai/v1/responses"
+MAX_RETRIES = 3
+BACKOFF_SECONDS = (1, 3, 8)
+
+
+def call(
+    prompt: str,
+    *,
+    command: str,
+    model: str | None = None,
+    live_search: dict | None = None,
+    max_output_tokens: int = 4000,
+) -> dict[str, Any]:
+    """Call xAI's responses endpoint. Returns {text, usage, raw}.
+
+    live_search example: {"mode": "on", "sources": [{"type": "x"}]}
+    """
+    model = model or GROK_MODEL
+    headers = {
+        "Authorization": f"Bearer {XAI_API_KEY()}",
+        "Content-Type": "application/json",
+    }
+    body: dict[str, Any] = {
+        "model": model,
+        "input": prompt,
+        "max_output_tokens": max_output_tokens,
+    }
+    if live_search:
+        body["search_parameters"] = live_search
+
+    last_err: Exception | None = None
+    for attempt in range(MAX_RETRIES):
+        try:
+            r = requests.post(API_URL, json=body, headers=headers, timeout=180)
+            if r.status_code == 200:
+                data = r.json()
+                text = _extract_text(data)
+                u = data.get("usage", {})
+                input_tokens = u.get("input_tokens") or u.get("prompt_tokens") or 0
+                output_tokens = u.get("output_tokens") or u.get("completion_tokens") or 0
+                cost = usage.estimate_cost(model, input_tokens, output_tokens)
+                usage.log_call(command, model, input_tokens, output_tokens, cost,
+                               extra={"live_search": bool(live_search)})
+                return {
+                    "text": text,
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                    "cost_usd": cost,
+                    "raw": data,
+                }
+            if r.status_code in (429, 500, 502, 503, 504):
+                wait = BACKOFF_SECONDS[min(attempt, len(BACKOFF_SECONDS) - 1)]
+                print(f"[Grok {r.status_code}, retrying in {wait}s...]")
+                time.sleep(wait)
+                continue
+            raise RuntimeError(f"Grok API error {r.status_code}: {r.text[:500]}")
+        except requests.RequestException as e:
+            last_err = e
+            wait = BACKOFF_SECONDS[min(attempt, len(BACKOFF_SECONDS) - 1)]
+            print(f"[Grok network error: {e}, retrying in {wait}s...]")
+            time.sleep(wait)
+
+    raise RuntimeError(f"Grok API failed after {MAX_RETRIES} retries: {last_err}")
+
+
+def _extract_text(data: dict) -> str:
+    """Pull text from xAI /v1/responses payload (handles output_text + nested output array)."""
+    if "output_text" in data and isinstance(data["output_text"], str):
+        return data["output_text"]
+    output = data.get("output", [])
+    chunks: list[str] = []
+    for item in output:
+        if isinstance(item, dict):
+            if item.get("type") == "message":
+                for c in item.get("content", []):
+                    if isinstance(c, dict) and c.get("type") in ("output_text", "text"):
+                        chunks.append(c.get("text", ""))
+            elif item.get("type") in ("output_text", "text"):
+                chunks.append(item.get("text", ""))
+    return "\n".join([c for c in chunks if c])

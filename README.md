@@ -117,7 +117,7 @@ Claude pulls your calendar events, overdue tasks, and overnight changes into tod
 
 ---
 
-## 24 Commands
+## 31 Commands
 
 ### Operations -- Claude remembers
 
@@ -159,6 +159,20 @@ Claude pulls your calendar events, overdue tasks, and overnight changes into tod
 | Command | What it does |
 |---|---|
 | `/obsidian-world` | Loads identity + state with progressive token budgets (L0-L3) |
+
+### Research -- Claude pulls knowledge in
+
+Powered by xAI Grok (live X access) + Perplexity Sonar (web research) + YouTube. Findings save to `Research/` as AI-first notes (preamble, frontmatter, recency markers, sources verbatim).
+
+| Command | What it does |
+|---|---|
+| `/x-read [url]` | Deep-read an X post — verbatim post + thread + TL;DR + claims + reply sentiment + voices |
+| `/x-pulse [topic]` | Scan X for what's trending — themes, voices, hooks, post ideas |
+| `/research [topic]` | Web research with citations — full dossier with recency markers and open questions |
+| `/research-deep [topic]` | Vault-first synthesis — scans your vault, finds gaps, fills them, propagates updates across people/projects/ideas |
+| `/youtube [url]` | Extract transcript + metadata + top comments → AI-first summary |
+
+**Setup:** copy `.env.example` to `~/.config/obsidian-second-brain/.env`, add your keys (xAI, Perplexity, YouTube optional). Run `install.sh` and answer "y" to the research prompt to do this automatically.
 
 <details>
 <summary><strong>See the thinking tools in action</strong></summary>
