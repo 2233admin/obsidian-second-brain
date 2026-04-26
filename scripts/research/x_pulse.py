@@ -55,11 +55,14 @@ def main(argv: list[str]) -> int:
     print(f"[/x-pulse] Scanning X for '{topic}' via Grok + Live Search...\n", file=sys.stderr)
 
     try:
+        # /x-pulse synthesizes across many posts → uses the reasoning model.
+        # /x-read just extracts one post → grok-4 (default) is enough.
         result = grok.call(
             prompt,
             command="x-pulse",
+            model="grok-4.20-reasoning",
             tools=[{"type": "x_search"}],
-            max_output_tokens=4000,
+            max_output_tokens=4500,
         )
     except SystemExit:
         raise

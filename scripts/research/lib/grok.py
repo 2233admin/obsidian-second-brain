@@ -1,11 +1,21 @@
 """xAI Grok client with Live Search support. Uses the /v1/responses endpoint."""
 
+import re
 import time
 import requests
 from typing import Any
 
 from .config import GROK_MODEL, XAI_API_KEY
 from . import usage
+
+# Strip Grok's internal tool-call protocol XML if it leaks into output text.
+# Seen patterns:
+#   <xai:function_call>...</xai:function_call>
+#   <parameter name="...">...</parameter>
+_TOOL_CALL_LEAK = re.compile(
+    r"<xai:function_call[^>]*>.*?</xai:function_call>|<parameter\s+name=\"[^\"]*\">[^<]*</parameter>",
+    re.DOTALL,
+)
 
 API_URL = "https://api.x.ai/v1/responses"
 MAX_RETRIES = 3
@@ -75,9 +85,12 @@ def call(
 
 
 def _extract_text(data: dict) -> str:
-    """Pull text from xAI /v1/responses payload (handles output_text + nested output array)."""
+    """Pull text from xAI /v1/responses payload (handles output_text + nested output array).
+
+    Also strips leaked tool-call protocol XML from the model's text output.
+    """
     if "output_text" in data and isinstance(data["output_text"], str):
-        return data["output_text"]
+        return _clean(data["output_text"])
     output = data.get("output", [])
     chunks: list[str] = []
     for item in output:
@@ -88,4 +101,10 @@ def _extract_text(data: dict) -> str:
                         chunks.append(c.get("text", ""))
             elif item.get("type") in ("output_text", "text"):
                 chunks.append(item.get("text", ""))
-    return "\n".join([c for c in chunks if c])
+    return _clean("\n".join([c for c in chunks if c]))
+
+
+def _clean(text: str) -> str:
+    """Remove leaked tool-call XML and trim leading/trailing whitespace."""
+    cleaned = _TOOL_CALL_LEAK.sub("", text)
+    return cleaned.strip()
