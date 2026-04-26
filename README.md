@@ -483,6 +483,46 @@ Without keys, the existing 26 vault commands still work fine. Research toolkit j
 
 ---
 
+## FAQ
+
+### What is a Claude Code skill?
+A Claude Code skill is a reusable behavior package for Anthropic's Claude Code CLI. It bundles slash commands, scripts, references, and operating instructions that Claude loads automatically. Skills give Claude domain expertise without prompt-engineering each session.
+
+### Does this work with Obsidian Sync?
+Yes. The skill writes to your vault as standard markdown files. Obsidian Sync, iCloud, Syncthing, and Git-based sync all work without modification.
+
+### Do I need API keys to use this?
+No. The original 26 vault commands (`/obsidian-save`, `/obsidian-daily`, etc.) work without any API keys. Only the 5 research commands (`/x-read`, `/x-pulse`, `/research`, `/research-deep`, `/youtube`) require API keys for xAI Grok, Perplexity, and optionally YouTube Data API v3. Without keys, those commands degrade gracefully — they exit with a clear setup message.
+
+### How is this different from Notion AI or Mem?
+Notion AI and Mem are closed-source SaaS products that own your data. This skill stores everything as plain markdown in your local Obsidian vault, with no vendor lock-in. The AI is on top of your data, not behind it. You can switch tools or stop using the skill at any point and still have your full vault.
+
+### What is the AI-first vault rule?
+The principle that vault notes are written for future-Claude to retrieve and reason over, not for human reading. Notes have machine-readable structure, recency markers per claim, mandatory `[[wikilinks]]`, source URLs preserved verbatim, and confidence levels. See [`references/ai-first-rules.md`](references/ai-first-rules.md) for the full specification with frontmatter schemas per note type.
+
+### Is this safe to run on my existing vault?
+Yes. The skill never deletes or modifies notes destructively without explicit confirmation. Existing notes stay as-is. New notes follow the AI-first rule. `/obsidian-health` flags pre-AI-first notes so you can update them on your own schedule.
+
+### What does `/research-deep` do that `/research` doesn't?
+`/research` runs a single Perplexity query and returns a dossier with citations. `/research-deep` is vault-first: it scans your existing notes, identifies what you already know about the topic, spawns 3-5 targeted follow-up searches to fill only the gaps, and produces a delta report (what's new, what's confirmed, contradictions to resolve, recommended vault updates). Vault-first means you stop re-researching what's already in your notes.
+
+### What do the research commands cost?
+Approximate per-call costs as of 2026-04: `/x-read` ~$0.05, `/x-pulse` ~$0.13, `/research` ~$0.04, `/research-deep` ~$0.40-$0.80, `/youtube` ~$0.04. Costs for Grok calls are logged to `~/.research-toolkit/usage.log` for visibility. No hard caps — you're trusted to monitor your own spend.
+
+### Can I use this on Windows or Linux?
+The core vault commands work anywhere Claude Code runs. The research toolkit was tested on macOS — `install.sh` and the auto-open behavior assume macOS conventions (`~/.config`, `open` command). Pull requests welcome to add Windows and Linux paths.
+
+### How do I update from v0.5 to v0.6?
+```bash
+cd ~/.claude/skills/obsidian-second-brain && git pull
+```
+Nothing to re-run. Commands pick up the new instructions automatically.
+
+### Where do I file issues or feature requests?
+GitHub Issues: https://github.com/eugeniughelbur/obsidian-second-brain/issues. PRs welcome — see Contributing below.
+
+---
+
 ## Philosophy
 
 Most second brain tools make you the janitor.
