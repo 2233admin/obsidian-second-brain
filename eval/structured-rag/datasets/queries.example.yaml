@@ -1,0 +1,21 @@
+# Minimal reproducible query set for examples/sample-vault.
+# expected_sources are vault-relative markdown paths.
+
+- id: sample-index
+  type: factual
+  question: "What file explains how future Claude should navigate the vault?"
+  expected_sources:
+    - "_CLAUDE.md"
+
+- id: sample-research-folder
+  type: factual
+  question: "Where should research outputs from slash commands be stored?"
+  expected_sources:
+    - "_CLAUDE.md"
+
+- id: sample-ai-first
+  type: thematic
+  question: "Which notes describe AI-first vault rules or retrieval behavior?"
+  expected_sources:
+    - "_CLAUDE.md"
+
