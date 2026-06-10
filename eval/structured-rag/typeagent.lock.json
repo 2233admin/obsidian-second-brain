@@ -1,0 +1,12 @@
+{
+  "source": "https://github.com/microsoft/TypeAgent",
+  "commit": "2a1fd8c274f675201daccf7cbbb9268aac432666",
+  "component": "KnowPro / Structured RAG",
+  "mode": "optional fixed source snapshot",
+  "notes": [
+    "Do not replace vault markdown as source of truth.",
+    "Use Structured RAG indexes only as rebuildable evaluation caches.",
+    "Vendor only the minimal KnowPro packages needed by the runner."
+  ]
+}
+
