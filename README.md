@@ -30,22 +30,31 @@
 <h1 align="center">obsidian-second-brain</h1>
 
 <p align="center">
-  <strong>An evolution of <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">Karpathy's LLM Wiki pattern</a>: a vault that rewrites itself.</strong>
+  <strong>Karpathy 的 <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">LLM Wiki 模式</a>的进化版：一个会自己改写的 vault。</strong>
   <br /><br />
-  <em>Every source updates existing pages instead of just appending new ones. Contradictions reconcile automatically. Your vault compounds while you sleep.</em>
+  <em>每个来源都更新现有页面，而不是只追加新页面。矛盾自动调和。你的 vault 在你睡觉时长本事。</em>
   <br /><br />
-  <em>44 commands &middot; auto-synthesis &middot; thinking tools that argue with you</em>
+  <em>44 个命令 &middot; 自动合成 &middot; 会跟你吵架的思考工具</em>
   <br /><br />
-  <em>live research from X, the web, and YouTube &middot; 4 scheduled agents &middot; 4 role presets</em>
+  <em>来自 X、网页和 YouTube 的实时研究 &middot; 4 个定时 agent &middot; 4 种角色预设</em>
   <br /><br />
-  <em>write-time AI-first validator &middot; <code>/create-command</code> interview flow &middot; multilingual trigger schema</em>
+  <em>写入时 AI-first 验证器 &middot; <code>/create-command</code> 访谈流程 &middot; 多语言触发模式</em>
   <br /><br />
-  <a href="#what-happens-when-you-install-this">See it in action</a> &middot;
-  <a href="#43-commands">All commands</a> &middot;
-  <a href="#install">Install</a> &middot;
-  <a href="#choose-your-preset">Presets</a> &middot;
-  <a href="https://github.com/eugeniughelbur/obsidian-second-brain/discussions">Discussions</a>
+  <a href="#what-happens-when-you-install-this">看实际效果</a> &middot;
+  <a href="#43-commands">全部命令</a> &middot;
+  <a href="#install">安装</a> &middot;
+  <a href="#choose-your-preset">预设</a> &middot;
+  <a href="https://github.com/eugeniughelbur/obsidian-second-brain/discussions">讨论</a>
 </p>
+
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Stars](https://img.shields.io/github/stars/2233admin/obsidian-second-brain)
+![Last Commit](https://img.shields.io/github/last-commit/2233admin/obsidian-second-brain)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB)
+
+- **One-liner**: A cross-CLI skill that turns your Obsidian vault into a self-maintaining second brain.
+- **For**: You use Claude Code / Codex / Gemini / OpenCode and want a vault that remembers, reconciles, and synthesizes on its own.
+- **Not for**: You just want a plain Obsidian plugin, or you don't use AI CLI agents.
 
 <p align="center">
   <strong>v0.10 - The Architect (May 2026):</strong> new <code>/obsidian-architect</code> scans a codebase and writes maintained architecture notes into your vault - refreshable, never clobbering your edits.<br/>
@@ -115,29 +124,29 @@
 
 ---
 
-## The Problem
+## 问题
 
-You use Claude every day. Every session starts from scratch. You re-explain everything. The conversation ends. Everything disappears.
+你每天都在用 Claude。每次会话都从零开始。你重新解释一切。对话结束。一切消失。
 
-You take notes in Obsidian. Hundreds of files. They just sit there. You make the same decision twice because you forgot you made it six months ago. Ideas rot in daily notes. Nobody connects the dots.
+你在 Obsidian 里记笔记。几百个文件。它们就躺在那里。你做了两次同样的决定，因为你忘了六个月前已经做过了。想法在日常笔记里腐烂。没人把点连起来。
 
-**Two powerful tools. Completely disconnected.**
+**两个强大的工具。完全断开。**
 
 ---
 
-## How this extends Karpathy's LLM Wiki
+## 如何扩展 Karpathy 的 LLM Wiki
 
-Karpathy's pattern is brilliant. Drop sources, LLM creates wiki pages, ask questions. This skill takes it further:
+Karpathy 的模式很聪明。丢来源，LLM 创建 wiki 页面，问问题。这个 skill 更进一步：
 
-| | Karpathy's LLM Wiki | obsidian-second-brain |
+| | Karpathy 的 LLM Wiki | obsidian-second-brain |
 |---|---|---|
-| **New sources** | Append new pages, cross-reference | **Rewrite existing pages.** People get updated, claims revised, stale facts replaced. |
-| **Contradictions** | Flagged, you resolve manually | `/obsidian-reconcile` resolves them automatically |
-| **Patterns** | Surface when you ask | `/obsidian-synthesize` finds unnamed patterns and writes synthesis pages on its own |
-| **When it runs** | On demand, when you prompt | 4 scheduled agents: nightly close, weekly review, contradiction sweep, vault-health check |
-| **Note format** | Human-readable wiki pages | AI-first: `## For future Claude` preamble + frontmatter for LLM retrieval, not human review |
+| **新来源** | 追加新页面，交叉引用 | **改写现有页面。** 人物更新，主张修正，过时事实替换。 |
+| **矛盾** | 标记，你手动解决 | `/obsidian-reconcile` 自动解决 |
+| **模式** | 问的时候才浮现 | `/obsidian-synthesize` 自己发现未命名模式并写合成页面 |
+| **何时运行** | 按需，你提示的时候 | 4 个定时 agent：夜间收尾、每周回顾、矛盾扫描、vault 健康检查 |
+| **笔记格式** | 人类可读的 wiki 页面 | AI-first：`## For future Claude` 前言 + 供 LLM 检索的 frontmatter，不是供人类审阅 |
 
-If Karpathy's wiki is a knowledge base you maintain with an LLM, this is a knowledge base that maintains itself.
+如果 Karpathy 的 wiki 是你用 LLM 维护的知识库，这是一个自己维护自己的知识库。
 
 ---
 
@@ -784,6 +793,14 @@ Built by **Eugeniu Ghelbur**, AI Automation Engineer @ Single Grain
 </table>
 
 </div>
+
+---
+
+## Related Projects
+
+- [obsidian-vault-bridge](https://github.com/2233admin/obsidian-vault-bridge) — Turn your vault into an MCP server
+- [markdown-memory](https://github.com/2233admin/markdown-memory) — File-driven AI memory bridge
+- [voile](https://github.com/2233admin/voile) — Chat logs compiled into Obsidian knowledge
 
 ---
 
