@@ -1,196 +1,242 @@
-# obsidian-second-brain - architecture
+# obsidian-second-brain Architecture
 
-How the layers fit together. This document describes the system: its components, how they connect, and how data flows from a slash command to a vault note. For the per-command operating manual see `SKILL.md`; for the contributor rules see `CLAUDE.md`.
+## System Overview
 
-Last reviewed against commit `ff0319c` (2026-06-05).
+```mermaid
+graph TB
+    subgraph CLI["AI CLI Platforms"]
+        ClaudeCode["Claude Code"]
+        CodexCLI["Codex CLI"]
+        GeminiCLI["Gemini CLI"]
+        OpenCode["OpenCode"]
+    end
+    
+    subgraph Skill["obsidian-second-brain Skill"]
+        subgraph Commands["44 Slash Commands"]
+            VaultMgmt["Vault Management<br/>12 commands"]
+            Thinking["Thinking Tools<br/>8 commands"]
+            Research["Research Toolkit<br/>14 commands"]
+            Agents["Scheduled Agents<br/>10 commands"]
+        end
+        
+        subgraph Adapters["Platform Adapters"]
+            ClaudeAdapter["Claude Code Adapter<br/>Identity Copy"]
+            CodexAdapter["Codex CLI Adapter<br/>AGENTS.md"]
+            GeminiAdapter["Gemini CLI Adapter<br/>GEMINI.md"]
+            OpenCodeAdapter["OpenCode Adapter<br/>OPENCODE.md"]
+        end
+        
+        subgraph Core["Core Engine"]
+            Dispatcher["Command Dispatcher"]
+            Validator["AI-First Validator"]
+            Compiler["Vault Compiler"]
+            Synthesizer["Auto-Synthesizer"]
+        end
+    end
+    
+    subgraph Vault["Obsidian Vault"]
+        subgraph Layers["Vault Layers"]
+            Raw["raw/<br/>Sources & Inputs"]
+            Wiki["wiki/<br/>Compiled Articles"]
+            Schema["schema/<br/>Templates & Rules"]
+            Meta["meta/<br/>Indexes & State"]
+        end
+        
+        subgraph AgentsLayer["Scheduled Agents"]
+            Nightly["Nightly Agent<br/>Auto-synthesis"]
+            Weekly["Weekly Agent<br/>Review & Cleanup"]
+            Challenge["Challenge Agent<br/>Contradiction Detection"]
+            Emerge["Emerge Agent<br/>New Concept Discovery"]
+        end
+    end
+    
+    subgraph External["External Services"]
+        Perplexity["Perplexity API"]
+        Grok["Grok API"]
+        Gemini["Gemini File Search"]
+        YouTube["YouTube API"]
+        X["X / Twitter API"]
+    end
+    
+    CLI --> Adapters
+    Adapters --> Dispatcher
+    Dispatcher --> Commands
+    Commands --> Core
+    Core --> Vault
+    Commands --> External
+    
+    AgentsLayer --> Core
+    
+    style Skill fill:#1a1a2e,stroke:#4a4a6a,color:#fff
+    style Commands fill:#16213e,stroke:#4a4a6a,color:#fff
+    style Core fill:#0f3460,stroke:#4a4a6a,color:#fff
+    style Vault fill:#533483,stroke:#4a4a6a,color:#fff
+    style AgentsLayer fill:#2d1b69,stroke:#4a4a6a,color:#fff
+```
 
+## Core Components
+
+### 1. Command Layer (44 Commands)
+
+| Layer | Count | Purpose |
+|-------|-------|---------|
+| Vault Management | 12 | Save, ingest, organize, maintain vault |
+| Thinking Tools | 8 | Challenge assumptions, find contradictions, explore ideas |
+| Research Toolkit | 14 | X/Twitter, web research, YouTube, NotebookLM, deep research |
+| Scheduled Agents | 10 | Nightly synthesis, weekly review, challenge, emerge |
+
+### 2. Platform Adapters
+- **Claude Code**: Identity copy (native slash command format)
+- **Codex CLI**: Compiles to `AGENTS.md` + `.codex/commands/`
+- **Gemini CLI**: Compiles to `GEMINI.md` + `.gemini/commands/`
+- **OpenCode**: Compiles to `OPENCODE.md` + `.opencode/commands/`
+
+### 3. Core Engine
+- **Command Dispatcher**: Routes commands to appropriate handlers
+- **AI-First Validator**: Ensures vault writes follow AI-first rules
+- **Vault Compiler**: Transforms raw sources into compiled wiki articles
+- **Auto-Synthesizer**: Nightly agent that updates and connects notes
+
+### 4. Vault Layers
+- **raw/**: Unprocessed sources (URLs, PDFs, transcripts)
+- **wiki/**: Compiled, reviewed articles with citations
+- **schema/**: Templates, frontmatter rules, validation schemas
+- **meta/**: Indexes, access logs, vitality scores
+
+## Data Flow
+
+```mermaid
+flowchart LR
+    subgraph Input
+        User["User Input"]
+        Source["External Source"]
+    end
+    
+    subgraph Processing
+        Ingest["Ingest<br/>Save to raw/"]
+        Compile["Compile<br/>raw/ → wiki/"]
+        Synthesize["Synthesize<br/>Update & Connect"]
+        Validate["Validate<br/>AI-First Rules"]
+    end
+    
+    subgraph Output
+        Wiki["wiki/<br/>Compiled Articles"]
+        Index["meta/_index.md"]
+        Report["Synthesis Report"]
+    end
+    
+    User --> Ingest
+    Source --> Ingest
+    Ingest --> Compile
+    Compile --> Validate
+    Validate --> Wiki
+    Wiki --> Index
+    Synthesize --> Report
+    Wiki --> Synthesize
+```
+
+## AI-First Vault Principle
+
+Every note written to the vault follows the AI-First specification:
+
+```markdown
+---
+title: "Concept Name"
+type: concept
+date: 2026-08-01
+tags: [domain, topic]
+ai-first: true
+sources: ["[[raw/articles/source.md]]"]
+coverage: medium
+confidence: high
 ---
 
-## System overview
+## For future Claude
 
-obsidian-second-brain is a cross-CLI **skill** (not a plugin, not a hosted service) that turns any Obsidian vault into an AI-first second brain. One platform-neutral command source compiles to four AI CLIs - Claude Code, Codex CLI, Gemini CLI, OpenCode - through a build-time adapter pattern. At runtime a slash command reads and writes the user's vault as plain markdown; commands shell out to Python helpers for anything deterministic (vault health, research fetches, codebase scans).
+Context for AI retrieval: this note covers X, relates to Y, and was compiled from Z.
 
-- **44 commands**, grouped by `category:` frontmatter: vault 17, thinking 13, research 8, meta 6.
-- **40 commands are cross-platform.** The 4 Google Calendar commands (`/obsidian-agenda`, `/obsidian-calendar`, `/obsidian-meeting`, `/obsidian-schedule`) carry `exclude: [codex-cli, gemini-cli, opencode]` and ship Claude Code only, because they depend on the Google Calendar MCP.
-- A research toolkit that is key-less by default (free public sources) and uses Grok + Perplexity + Gemini when keys are present.
-- An opt-in background agent plus optional user-scheduled agents.
-- MIT licensed.
+# Concept Name
 
-The AI-first vault rule ties it all together: every note a command writes is designed for future-Claude retrieval, not human reading. The canonical spec is `references/ai-first-rules.md`, referenced from `_CLAUDE.md` Section 0 and from every command that writes to the vault.
+Core explanation with [[wikilinks]] to related concepts.
 
----
+## Details
 
-## The adapter pattern (the core idea)
+Extracted information with source attribution.
 
-`commands/` is the single source of truth. The build compiles it per platform instead of maintaining four command sets.
+## Relationships
 
-- `commands/<name>.md` uses Claude Code's slash-command shape and declares `description:`, `category:`, `triggers_en:`, and optional `exclude:` frontmatter.
-- `scripts/build.sh` orchestrates the `adapters/` layer. `bash scripts/build.sh` builds all platforms; `--platform <name>` builds one.
-- The **Claude Code adapter is an identity copy**. The other three adapters emit a dispatcher file at the dist root (`AGENTS.md` or `GEMINI.md`) with an auto-generated routing table built from each command's `description:`, grouped by `category:` then language, plus the command bodies under `.codex/commands/` (or `.gemini/`, `.opencode/`).
-- Claude-specific wording is neutralized for the other CLIs (for example `Read tool` becomes `read files`).
-- Output lands in `dist/<platform>/`, which is gitignored and regenerated - never hand-edited.
+- Builds on [[Foundation Concept]]
+- Contradicts [[Other Claim]] on X
 
-**Consequence for contributors:** to add or change a command, edit only `commands/<name>.md`. The adapters pick it up on the next build. No adapter change is needed.
+## Sources
 
----
+- [[raw/articles/source.md]] -- key claims from this source
+```
 
-## Repo layout
+## Scheduled Agents
 
-| Path | Role |
-|---|---|
-| `commands/` | 44 slash-command definitions, one `.md` each. The platform-neutral source and the product surface. |
-| `references/` | Shared specs the commands link to. `ai-first-rules.md` is the canonical, non-negotiable vault-write spec. |
-| `scripts/` | Python and Shell engine: build orchestrator, vault tooling, research toolkit, codebase scanner. |
-| `adapters/` | Platform translation layer. `lib.sh` plus one `adapter.sh` per CLI. |
-| `hooks/` | Claude Code hooks: AI-first write validation, session-start context injection, opt-in background agent. |
-| `dist/` | Build output, one tree per platform. Gitignored. Regenerate with `scripts/build.sh`. |
-| `tests/` | Smoke tests and fixtures, run in CI. |
-| `examples/sample-vault/` | Fictional AI-first notes that show what good output looks like. |
-| `SKILL.md` | Full operating manual loaded when the skill activates. |
-| `architecture.md` | This document. |
-| `README.md` | Public-facing docs on github.com. |
-| `pyproject.toml` | Python dependencies, managed via `uv`. |
+```mermaid
+graph LR
+    subgraph Schedule["Agent Schedule"]
+        Nightly["Nightly (03:00)<br/>Auto-synthesis"]
+        Weekly["Weekly (Sunday)<br/>Review & Cleanup"]
+        Challenge["On-demand<br/>Contradiction Detection"]
+        Emerge["On-demand<br/>New Concept Discovery"]
+    end
+    
+    subgraph Actions["Agent Actions"]
+        Update["Update existing notes"]
+        Connect["Create new connections"]
+        Resolve["Resolve contradictions"]
+        Discover["Discover new concepts"]
+    end
+    
+    Nightly --> Update
+    Nightly --> Connect
+    Weekly --> Resolve
+    Challenge --> Resolve
+    Emerge --> Discover
+```
+
+## Key Design Decisions
+
+1. **Vault Rewrites Itself**: Every source updates existing pages instead of just appending
+2. **AI-First Notes**: Notes designed for AI retrieval, not human reading
+3. **Multi-Platform**: One codebase, four CLI platforms
+4. **Scheduled Agents**: Autonomous agents that maintain vault health
+5. **Dry-Run Default**: All write operations are dry-run unless explicitly applied
+6. **File-Based State**: All state in files, no database, no cloud dependency
+
+## Technology Stack
+
+- **Primary**: Markdown, YAML frontmatter
+- **Scripting**: Python 3.11+, Bash
+- **Platforms**: Claude Code, Codex CLI, Gemini CLI, OpenCode
+- **External APIs**: Perplexity, Grok, Gemini File Search, YouTube, X/Twitter
+- **Build**: esbuild, shell scripts
+
+## File Structure
 
 ```
 obsidian-second-brain/
-|-- commands/            # 44 command .md files (the source)
-|-- references/          # ai-first-rules.md (canonical) + schemas + templates + bases/
-|-- scripts/             # build.sh, lib.sh, vault tooling, research/, architect_scan.py, ...
-|-- adapters/            # lib.sh + {claude-code,codex-cli,gemini-cli,opencode}/adapter.sh
-|-- hooks/               # validate-ai-first.sh, load_vault_context.py, obsidian-bg-agent.sh
-|-- dist/                # build output per platform (gitignored)
-|-- tests/               # smoke tests + CI fixtures
-|-- examples/sample-vault/
-|-- SKILL.md  architecture.md  README.md  pyproject.toml
+├── commands/               # 44 slash command definitions
+│   ├── obsidian-save.md
+│   ├── obsidian-ingest.md
+│   ├── obsidian-architect.md
+│   └── ...
+├── adapters/               # Platform translation layer
+│   ├── claude-code/
+│   ├── codex-cli/
+│   ├── gemini-cli/
+│   └── opencode/
+├── scripts/                # Python helpers
+│   ├── research/
+│   ├── bootstrap_vault.py
+│   └── vault_health.py
+├── references/             # Shared specs
+│   └── ai-first-rules.md   # Canonical vault-write spec
+├── hooks/                  # Claude Code hooks
+├── dist/                   # Build output (gitignored)
+├── SKILL.md                # Full operating manual
+└── README.md               # Public documentation
 ```
-
----
-
-## Architecture diagram
-
-```mermaid
-graph TD
-  REF["references/<br/>specs (ai-first-rules.md = canonical)"]
-  CMD["commands/<br/>44 .md, platform-neutral source"]
-  SCR["scripts/<br/>engine + research toolkit + build.sh"]
-  ADP["adapters/<br/>lib.sh + 4 platform adapters"]
-  HK["hooks/<br/>validate-ai-first, context loader, bg-agent"]
-  DIST["dist/&lt;platform&gt;/<br/>build output (gitignored)"]
-  VAULT["User's Obsidian vault<br/>(AI-first markdown notes)"]
-
-  REF -. spec referenced by .-> CMD
-  CMD -- "scripts/build.sh + adapters/" --> ADP
-  ADP -- "compile per platform" --> DIST
-  CMD -- "invoke (deterministic work)" --> SCR
-  SCR -- "write notes" --> VAULT
-  CMD -- "write notes" --> VAULT
-  HK -- "validate writes / inject context" --> VAULT
-```
-
----
-
-## Command categories
-
-Commands are grouped by `category:` frontmatter, not by folder. Counts are at commit `ff0319c`. Commands marked `(Claude Code only)` are excluded from the Codex / Gemini / OpenCode builds.
-
-### Vault (17)
-Vault management: saving, organizing, searching, scheduling, maintaining.
-
-`/obsidian-save` `/obsidian-daily` `/obsidian-log` `/obsidian-task` `/obsidian-person` `/obsidian-capture` `/obsidian-find` `/obsidian-recap` `/obsidian-board` `/obsidian-project` `/obsidian-projects` `/obsidian-recurring` `/obsidian-world` `/obsidian-agenda` (Claude Code only) `/obsidian-calendar` (Claude Code only) `/obsidian-meeting` (Claude Code only) `/obsidian-schedule` (Claude Code only)
-
-### Thinking (13)
-Use vault history to generate insight, challenge assumptions, surface patterns, and record decisions.
-
-`/obsidian-challenge` `/obsidian-emerge` `/obsidian-connect` `/obsidian-graduate` `/obsidian-decide` `/obsidian-adr` `/obsidian-reconcile` `/obsidian-review` `/obsidian-synthesize` `/obsidian-learn` `/obsidian-panel` `/idea-discovery` `/vault-deep-synthesis`
-
-### Research (8)
-AI-powered research and ingestion; findings save to the vault following the AI-first rule.
-
-`/research` `/research-deep` `/notebooklm` `/x-read` `/x-pulse` `/youtube` `/podcast` `/obsidian-ingest`
-
-### Meta (6)
-Bootstrap, audit, export, visualize, document, and extend the system itself.
-
-`/obsidian-init` `/obsidian-health` `/obsidian-export` `/obsidian-visualize` `/obsidian-architect` `/create-command`
-
----
-
-## The AI-first rule (non-negotiable)
-
-Every command that writes to a vault must follow `references/ai-first-rules.md`. Notes are built for future-Claude retrieval:
-
-- A `## For future Claude` preamble at the top of every note.
-- Rich frontmatter: `type`, `date`, `tags`, `ai-first: true`, plus type-specific fields.
-- `[[wikilinks]]` for every person, project, idea, decision, and concept referenced.
-- External claims carry recency markers like `(as of 2026-04, source.com)` with the source URL inline.
-- Confidence levels (`stated | high | medium | speculation`) where applicable.
-- Anti-fabrication and search-completeness are hard rules: never invent facts, never claim absence without an exhaustive search, mark unknowns as `TBD`.
-
-`ai-first-rules.md` also holds the per-type frontmatter schemas (daily, project, person, task, decision, devlog, review, research, adr, the thinking-tool types, agenda-snapshot, meeting, recurring-task, architecture-overview, architecture-module).
-
----
-
-## Research toolkit
-
-Lives under `scripts/research/`. One Python entry point per research command plus a `lib/` layer.
-
-- **Keyed mode:** Perplexity Sonar for web research, Grok (xAI Agent Tools API, default grok-4) for X and live search, Gemini File Search for vault-grounded NotebookLM queries.
-- **Free key-less mode:** when no Perplexity key is set, `/research` and `/research-deep` fall back to roughly ten free public sources (Wikipedia, HackerNews, arXiv, Reddit, Lobsters, dev.to, OpenAlex, Semantic Scholar, CrossRef, DuckDuckGo) via `scripts/research/lib/`, and Claude synthesizes the dossier. This removed the project's single biggest adoption barrier - the toolkit no longer hard-errors without a paid key.
-- **Other ingest:** `/youtube` (transcript via `youtube-transcript-api`), `/podcast` (RSS via `feedparser`).
-
-Configuration is read from the environment or `~/.config/obsidian-second-brain/.env`; `OBSIDIAN_VAULT_PATH` is required so notes save to the right vault on any machine.
-
-Python dependencies (`pyproject.toml`, managed via `uv`): `openai`, `requests`, `python-dotenv`, `youtube-transcript-api`, `google-api-python-client`, `google-genai`, `feedparser`.
-
----
-
-## Hooks (Claude Code)
-
-Hooks enforce the rules mechanically instead of relying on the model to remember them. They are Claude Code specific - the other CLIs have no hook system, so there the AI-first rule rests on the in-body command instructions.
-
-- **`validate-ai-first.sh`** (`PostToolUse` on Write/Edit). Warns when a vault markdown write is missing AI-first frontmatter or the `## For future Claude` preamble. Check 5 is the substitution-character gate (em-dash, curly quotes, Unicode math).
-- **`load_vault_context.py`** (`SessionStart`). Injects `_CLAUDE.md` / `index.md` / recent log once per session so commands do not re-read the operating manual every turn.
-- **`obsidian-bg-agent.sh`** (`PostCompact`, opt-in). On context compaction it spawns a headless `claude -p` in the vault to propagate the session summary into notes. Ships inert; arms only with `OBSIDIAN_BG_AGENT_ENABLED=1`. It only adds or updates - never deletes, archives, or merges.
-
----
-
-## Scheduled agents
-
-Scheduled maintenance is a usage pattern, not a set of bundled cron files. The skill does not ship `.plist` or crontab artifacts; instead the user tells Claude which commands to run on what cadence and Claude Code's scheduling system runs them autonomously. Typical uses: a morning daily-note + overdue-task pull, a nightly end-of-day summary, a weekly review, a periodic `/obsidian-health` audit.
-
-Headless gotcha (documented in `SKILL.md`): custom slash commands do not expand in non-interactive mode. A cron or launchd job must point at the underlying command logic or a wrapper rather than relying on slash-command expansion, and launchd jobs must set an explicit `PATH` because launchd strips the environment.
-
----
-
-## Runtime data flow (a command run, end to end)
-
-```
-User runs /obsidian-save (or any command)
-        |
-        v
-Command body (from dist/<platform>/, compiled from commands/)
-        |
-        |-- references references/ai-first-rules.md (how to write)
-        |-- invokes scripts/* for deterministic work (scan, fetch, health, build)
-        v
-Writes AI-first markdown notes to the vault
-        |
-        |-- validate-ai-first.sh checks the write (Claude Code)
-        |-- propagation: updates index.md, the operation log, linked notes, daily note
-        v
-Vault is updated; future /obsidian-world and load_vault_context.py read that state back
-```
-
-Background path: on context compaction the opt-in PostCompact hook runs a headless `claude -p` that propagates the session summary into the vault silently.
-
----
-
-## Key design principles
-
-1. **One source, many platforms.** `commands/` is canonical; adapters compile, never fork.
-2. **AI-first or it does not ship.** `ai-first-rules.md` is non-negotiable and enforced at write time.
-3. **Deterministic work goes to scripts.** Commands describe intent; Python does the parsing, fetching, and scanning, then hands structured output back for synthesis.
-4. **Search before create.** Never create a duplicate; never claim absence from memory.
-5. **Propagate everything.** Every write updates linked notes, the index, and the operation log.
-6. **Safe by default.** The background agent is opt-in and additive-only; `dist/` is regenerated, not edited; refresh-style commands (`/obsidian-architect`) use sentinel markers so re-runs never clobber hand edits.
-7. **The vault compounds.** More writing means more context, which makes the AI a more capable partner over time.

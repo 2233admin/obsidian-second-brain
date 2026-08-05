@@ -14,6 +14,10 @@ itself, writes the AI-first note to Research/Deep/, and propagates via
 /obsidian-save (see commands/research-deep.md). The vault scan is identical in
 both modes - /research-deep is vault-first by definition, so OBSIDIAN_VAULT_PATH
 is required either way.
+
+OpenCLI flow (--opencli): vault scan + opencli search adapters (arxiv, brave,
+google, wikipedia, google-scholar, ...) + Claude gap synthesis + delta note.
+No API key needed. The calling Claude handles all synthesis in this mode.
 """
 
 import json
@@ -341,15 +345,85 @@ def run_paid_deep(topic: str) -> int:
     return 0
 
 
+def run_opencli_deep(topic: str, academic: bool) -> int:
+    """Vault scan + opencli search adapters + Claude gap synthesis + delta note.
+    No API key needed."""
+    from .lib.aggregator import aggregate
+    from .lib.result import encode_results
+    from .research import _free_sources
+    from .lib.sources.opencli import OpenCLISource
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    print(f"[/research-deep --opencli] Phase 1: scanning vault for '{topic}'...", file=sys.stderr)
+    hits = vault_scan(topic)
+    print(f"[/research-deep --opencli] Found {len(hits)} relevant vault notes.", file=sys.stderr)
+
+    baseline_notes = []
+    for h in hits:
+        try:
+            excerpt = Path(h["abs_path"]).read_text(errors="ignore")[:MAX_BASELINE_CHARS_PER_NOTE].strip()
+        except OSError:
+            excerpt = ""
+        baseline_notes.append({"path": h["path"], "score": h["score"], "excerpt": excerpt})
+
+    opencli_src = OpenCLISource(n=8)
+    adapters = opencli_src.adapters()
+    academic_srcs = _free_sources(academic) if academic else []
+    sources = [opencli_src] + academic_srcs
+
+    label = "academic" if academic else "default"
+    print(
+        f"[/research-deep --opencli] Phase 2: aggregating via opencli ({len(adapters)} adapters: "
+        f"{', '.join(adapters)}) + {len(academic_srcs)} scholarly sources for '{topic}'...",
+        file=sys.stderr,
+    )
+    agg = aggregate(topic, sources, n_per_source=10)
+    stats = agg["stats"]
+    print(
+        f"[/research-deep --opencli] {stats['results_total']} results from "
+        f"{stats['sources_succeeded']}/{stats['sources_attempted']} sources.",
+        file=sys.stderr,
+    )
+
+    payload = {
+        "mode": "opencli-sources-deep",
+        "topic": topic,
+        "today": today,
+        "vault_baseline_notes": baseline_notes,
+        "sources": agg["results"],
+        "stats": stats,
+        "warnings": agg["warnings"],
+        "opencli_adapters": adapters,
+        "instruction": (
+            "You are the synthesizer in opencli mode. Using the vault_baseline_notes "
+            "(what the vault already knew) and the sources (fresh external findings), "
+            "produce a vault-first delta note with exactly these sections: "
+            "What's New Since Vault Baseline, What's Confirmed, "
+            "Contradictions / Updates Needed (name the [[vault path]]), Synthesis, "
+            "Recommended Vault Updates, Open Questions. Every external claim carries "
+            "a recency marker and source domain; every vault reference uses [[wikilinks]]. "
+            "Never invent facts. Save the note to Research/Deep/YYYY-MM-DD - <slug>.md "
+            "as AI-first (type: research-deep, ai-first: true), then run /obsidian-save "
+            "propagation on the synthesis and honor the Recommended Vault Updates bullets."
+        ),
+    }
+    print(json.dumps(payload, indent=2, default=encode_results))
+    return 0
+
+
 def main(argv: list[str]) -> int:
     args = argv[1:]
     force_free = "--free" in args
     academic = "--academic" in args
+    use_opencli = "--opencli" in args
     topic = " ".join(a for a in args if not a.startswith("--")).strip()
     if not topic:
-        print("Usage: /research-deep <topic> [--free] [--academic]", file=sys.stderr)
+        print("Usage: /research-deep <topic> [--free] [--academic] [--opencli]", file=sys.stderr)
         return 2
 
+    if use_opencli:
+        return run_opencli_deep(topic, academic)
     use_free = force_free or not os.environ.get("PERPLEXITY_API_KEY", "").strip()
     if use_free:
         return run_free_deep(topic, academic)

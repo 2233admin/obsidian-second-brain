@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-"""/research [topic] [--free] [--academic] - web research with citations.
+"""/research [topic] [--free] [--academic] [--opencli] - web research with citations.
 
-Two modes, chosen automatically:
+Three modes, chosen automatically:
 
 - Paid (default when PERPLEXITY_API_KEY is set): Perplexity Sonar produces a
   finished deep dossier, and this script saves the AI-first note itself.
 - Free (no key set, or --free passed): fetch raw results from free, key-less
   sources in parallel and emit them as JSON. The calling Claude then synthesizes
   the dossier from that JSON and writes the AI-first note (see commands/research.md).
+- OpenCLI (--opencli flag): use opencli search adapters (brave, google, arxiv,
+  wikipedia, google-scholar, ...) instead of HTTP-only sources. No API key needed.
+  Claude synthesizes the dossier from the aggregated results.
 
 --academic restricts the free sources to scholarly ones (arXiv, Semantic
 Scholar, OpenAlex, CrossRef). It has no effect in paid mode.
+--opencli is independent of the paid/free toggle and works without any API key."
 """
 
 import json
@@ -181,15 +185,53 @@ def run_paid(topic: str) -> int:
     return 0
 
 
+def _opencli_sources() -> list:
+    """Build OpenCLI source clients. Imported lazily so the source can be used
+    without the full research toolkit installed."""
+    from .lib.sources.opencli import OpenCLISource
+    return [OpenCLISource(n=8)]
+
+
+def run_opencli(topic: str, academic: bool) -> int:
+    """Fetch via opencli search adapters and emit JSON for Claude to synthesize.
+    No API key needed; works alongside or instead of Perplexity/Grok."""
+    from .lib.aggregator import aggregate
+    from .lib.result import encode_results
+
+    sources = _opencli_sources()
+    src = sources[0]
+    adapters = src.adapters()
+    label = "academic" if academic else "default"
+    print(
+        f"[/research --opencli] Aggregating via opencli ({len(adapters)} adapters: "
+        f"{', '.join(adapters)}) for '{topic}'...",
+        file=sys.stderr,
+    )
+    payload = aggregate(topic, sources, n_per_source=10)
+    payload["mode"] = "opencli-sources"
+    payload["opencli_adapters"] = adapters
+    stats = payload["stats"]
+    print(
+        f"[/research --opencli] {stats['results_total']} results from "
+        f"{stats['sources_succeeded']}/{stats['sources_attempted']} sources.",
+        file=sys.stderr,
+    )
+    print(json.dumps(payload, indent=2, default=encode_results))
+    return 0
+
+
 def main(argv: list[str]) -> int:
     args = argv[1:]
     force_free = "--free" in args
     academic = "--academic" in args
+    use_opencli = "--opencli" in args
     topic = " ".join(a for a in args if not a.startswith("--")).strip()
     if not topic:
-        print("Usage: /research <topic> [--free] [--academic]", file=sys.stderr)
+        print("Usage: /research <topic> [--free] [--academic] [--opencli]", file=sys.stderr)
         return 2
 
+    if use_opencli:
+        return run_opencli(topic, academic)
     use_free = force_free or not os.environ.get("PERPLEXITY_API_KEY", "").strip()
     if use_free:
         return run_free(topic, academic)
